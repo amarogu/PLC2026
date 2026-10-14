@@ -16,3 +16,4 @@ Cada TPC tem uma pasta própria (`TPC1`, `TPC2`, `TPC3`, …) com um manifesto `
 ## Resultados
 
 - [TPC2](TPC2/README.md): Conversor de Markdown para HTML
+- [TPC3](TPC3/README.md): Analisador léxico

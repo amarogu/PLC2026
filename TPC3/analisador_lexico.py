@@ -5,24 +5,42 @@ SPEC = [
     ('VAR', r'\?\w+'),
     ('LANGUAGE', r'@\w{2}'),
     ('STRING', r'"[^"]*"'),
-    ('CONCEPT', r'[\w:]+')
+    ('NUMBER', r'\d+(?:\.\d+)?(?![\w:])'),
+    ('CONCEPT', r'[\w:]+'),
+    ('SKIP', r'\s+'),
+    ('L_DELIMITER', r'{'),
+    ('R_DELIMITER', r'}'),
+    ('DOT', r'\.'),
+    ('ERROR', r'.'),
 ]
 
-def tokenize(raw, spec):
-    tokens = []
+RESERVED = {'LIMIT'}
 
-    for pair in spec:
-        matches = re.findall(pair[1], raw)
-        for match in matches:
-            tokens.append((pair[0], match))
+IGNORED = {'COMMENT', 'SKIP'}
+
+MASTER = re.compile('|'.join(f'(?P<{name}>{pattern})' for name, pattern in SPEC))
+
+def tokenize(raw):
+    tokens = []
+    for m in MASTER.finditer(raw):
+        kind = m.lastgroup
+        value = m.group()
+        if kind in IGNORED:
+            continue
+        if kind == 'CONCEPT' and value in RESERVED:
+            kind = 'RESERVED'
+        tokens.append((kind, value))
     return tokens
 
 def main():
-    if len(sys.argv) < 2:
-        print('expecting an argument as the raw text to tokenize')
-        return
-    print(tokenize(sys.argv[1], SPEC))
+    if len(sys.argv) > 1:
+        with open(sys.argv[1], encoding='utf-8') as f:
+            text = f.read()
+    else:
+        text = sys.stdin.read()
+
+    for tok in tokenize(text):
+        print(tok)
 
 if __name__ == '__main__':
     main()
-
